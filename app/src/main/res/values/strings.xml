@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Todo List</string>
+    <string name="note">Use this as a Note</string>
+    <string name="todo">Use this as a Todo</string>
+    <string name="title">Title</string>
+    <string name="enter_title">Enter title</string>
+    <string name="description">Description</string>
+    <string name="write_a_brief_description">Write a brief description</string>
+    <string name="date">Date</string>
+    <string name="set_date">Set date</string>
+    <string name="time">Time</string>
+    <string name="set_time">Set time</string>
+    <string name="save_task">Save task</string>
+    <string name="category">Category</string>
+</resources>

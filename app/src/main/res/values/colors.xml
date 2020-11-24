@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">@color/design_default_color_secondary</color>
+    <color name="colorPrimaryDark">#3700B3</color>
+    <color name="colorAccent">@color/design_default_color_secondary</color>
+    <color name="darkOrchid">#9932CC</color>
+
+    <array name="random_colors">
+        <item name="slateBlue" type = "color">#6A5ACD</item>
+        <item name="orange" type = "color">#FF8C00</item>
+        <item name="blue" type = "color">#00acee</item>
+        <item name="pink" type = "color">#FFC0CB</item>
+    </array>
+</resources>

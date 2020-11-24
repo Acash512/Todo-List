@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardTodo"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp"
+    app:cardElevation="10dp"
+    app:cardCornerRadius="10dp">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginTop="2dp"
+            android:layout_marginEnd="2dp"
+            app:cardCornerRadius="10dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="2dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:selectableItemBackground"
+                android:clickable="true"
+                android:padding="8dp">
+
+                <TextView
+                    android:id="@+id/viewTitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:paddingStart="8dp"
+                    android:text="@string/title"
+                    android:fontFamily="@font/raleway"
+                    android:textColor="@android:color/black"
+                    android:textStyle="bold"
+                    android:textSize="18sp"
+                    android:layout_toLeftOf="@id/viewCategory"
+                    android:layout_alignParentLeft="true"
+                    android:paddingLeft="8dp"
+                    android:layout_toStartOf="@id/viewCategory" />
+
+                <TextView
+                    android:id="@+id/viewCategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginTop="3dp"
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/category"
+                    android:fontFamily="@font/raleway"
+                    android:textColor="@android:color/black"
+                    android:textSize="14sp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp" />
+
+                <TextView
+                    android:id="@+id/viewDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/viewTitle"
+                    android:fontFamily="@font/raleway"
+                    android:padding="8dp"
+                    android:text="@string/description"
+                    android:textColor="@color/darkOrchid"
+                    android:textSize="15sp" />
+
+                <TextView
+                    android:id="@+id/viewDate"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/viewDescription"
+                    android:paddingStart="8dp"
+                    android:text="@string/date"
+                    android:fontFamily="@font/raleway"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:paddingLeft="8dp" />
+
+                <TextView
+                    android:id="@+id/viewTime"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/viewDescription"
+                    android:layout_alignParentEnd="true"
+                    android:layout_marginEnd="10dp"
+                    android:text="@string/time"
+                    android:fontFamily="@font/raleway"
+                    android:textColor="@android:color/black"
+                    android:textSize="16sp"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp" />
+
+                <ImageView
+                    android:id="@+id/editButton"
+                    android:layout_marginTop="10dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/viewTime"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="10dp"
+                    android:src="@drawable/edit"
+                    android:layout_alignParentLeft="true"
+                    android:layout_marginLeft="10dp" />
+            </RelativeLayout>
+        </com.google.android.material.card.MaterialCardView>
+</com.google.android.material.card.MaterialCardView>
