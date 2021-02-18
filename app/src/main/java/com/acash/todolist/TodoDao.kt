@@ -7,27 +7,30 @@ import androidx.room.Query
 import androidx.room.Update
 
 @Dao
-interface TodoDao{
+interface TodoDao {
     @Insert
     suspend fun insertTodo(todo: TodoModel)
 
     @Query("Select * from TodoModel where isFinished=0")
-    fun getAllTodos():LiveData<List<TodoModel>>
+    fun getAllTodos(): LiveData<List<TodoModel>>
+
+    @Query("Select * from TodoModel where isFinished=0")
+    fun getAllTodosAfterReboot(): List<TodoModel>
 
     @Query("Select * from TodoModel where id=:uid")
-    fun getTodoById(uid:Long):TodoModel
+    fun getTodoById(uid: Long): TodoModel
 
     @Query("Select * from TodoModel where isFinished=1")
-    fun getFinishedTasks():LiveData<List<TodoModel>>
+    fun getFinishedTasks(): LiveData<List<TodoModel>>
 
     @Query("Update TodoModel Set isFinished=1 where id=:uid")
-    fun finishTask(uid:Long)
+    fun finishTask(uid: Long)
 
     @Query("Delete from TodoModel where id=:uid")
-    fun deleteTask(uid:Long)
+    fun deleteTask(uid: Long)
 
     @Query("Select * from TodoModel where reqCodeForNotification=:code and isFinished=0")
-    fun getTodoByReqCode(code: Int):List<TodoModel>
+    fun getTodoByReqCode(code: Int): List<TodoModel>
 
     @Update
     fun editTodo(todo: TodoModel)

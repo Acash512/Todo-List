@@ -8,11 +8,13 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-object Swipe{
-    fun initSwipe(todoAdapter: TodoAdapter,
-                  context: Context,
-                  db: TodoDatabase,
-                  rView: RecyclerView) {
+object Swipe {
+    fun initSwipe(
+        todoAdapter: TodoAdapter,
+        context: Context,
+        db: TodoDatabase,
+        rView: RecyclerView
+    ) {
 
         val itemTouchCallBack = object :
             ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT) {
@@ -30,7 +32,7 @@ object Swipe{
                     val paint = Paint()
                     val icon: Bitmap
 
-                    if (dX > 0 && context is MainActivity){
+                    if (dX > 0 && context is MainActivity) {
                         icon = BitmapFactory.decodeResource(
                             context.resources,
                             R.drawable.ic_check_white_png

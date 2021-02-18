@@ -10,13 +10,11 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
-class
-
-AlarmReceiver : BroadcastReceiver() {
+class AlarmReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        val todoData=intent.getStringArrayExtra("todo")!!
-        val db by lazy{
+        val todoData = intent.getStringArrayExtra("todo")!!
+        val db by lazy {
             TodoDatabase.getDatabase(context)
         }
 
@@ -24,9 +22,9 @@ AlarmReceiver : BroadcastReceiver() {
             db.todoDao().getTodoByReqCode(todoData[0].toInt())
         }
 
-        runBlocking{
+        runBlocking {
             if (!list.await().isNullOrEmpty()) {
-                val nm: NotificationManager? =
+                val nm: NotificationManager =
                     context.getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
                 val pi = PendingIntent.getActivity(
                     context,
@@ -36,7 +34,7 @@ AlarmReceiver : BroadcastReceiver() {
                 )
 
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    nm?.createNotificationChannel(
+                    nm.createNotificationChannel(
                         NotificationChannel(
                             "TodoListAlarm",
                             "TodoList",
@@ -49,7 +47,7 @@ AlarmReceiver : BroadcastReceiver() {
                 }
 
                 val builder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    Notification.Builder(context,"TodoListAlarm")
+                    Notification.Builder(context, "TodoListAlarm")
                 } else {
                     Notification.Builder(context)
                         .setPriority(Notification.PRIORITY_HIGH)
@@ -57,16 +55,14 @@ AlarmReceiver : BroadcastReceiver() {
                 }
 
                 val todoNotification = builder
-                        .setContentTitle(todoData[1])
-                        .setContentText(todoData[2])
-                        .setSmallIcon(R.drawable.ic_stat_todo_list_icon)
-                        .addAction(R.drawable.ic_stat_todo_list_icon, "OPEN APP", pi)
-                        .setPriority(Notification.PRIORITY_HIGH)
-                        .build()
+                    .setContentTitle(todoData[1])
+                    .setContentText(todoData[2])
+                    .setSmallIcon(R.drawable.ic_stat_todo_list_icon)
+                    .addAction(R.drawable.ic_stat_todo_list_icon, "OPEN APP", pi)
+                    .setPriority(Notification.PRIORITY_HIGH)
+                    .build()
 
-                if (nm != null) {
-                    nm.notify(System.currentTimeMillis().toInt(), todoNotification)
-                }
+                nm.notify(System.currentTimeMillis().toInt(), todoNotification)
             }
         }
     }

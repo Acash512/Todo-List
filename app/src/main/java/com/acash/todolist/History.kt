@@ -1,20 +1,24 @@
 package com.acash.todolist
 
-import android.graphics.Color
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import kotlinx.android.synthetic.main.activity_history.*
+import kotlinx.android.synthetic.main.activity_history.adView
+import kotlinx.android.synthetic.main.activity_history.rView
+import kotlinx.android.synthetic.main.activity_history.toolbar
 
 class History : AppCompatActivity() {
     private val list = ArrayList<TodoModel>()
-    private val todoAdapter=TodoAdapter(list,this)
+    private val todoAdapter = TodoAdapter(list, this)
 
-    private val db by lazy{
+    private val db by lazy {
         TodoDatabase.getDatabase(this)
     }
 
@@ -22,40 +26,41 @@ class History : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_history)
 
-        toolbar.apply {
-            title = "History"
-            setTitleTextColor(Color.parseColor("#000000"))
-        }
+        toolbar.title = "History"
 
         setSupportActionBar(toolbar)
 
         rView.apply {
-            layoutManager=LinearLayoutManager(this@History,LinearLayoutManager.VERTICAL,true)
-            adapter=todoAdapter
+            layoutManager = LinearLayoutManager(this@History, LinearLayoutManager.VERTICAL, true)
+            adapter = todoAdapter
         }
 
-        Swipe.initSwipe(todoAdapter,this,db,rView)
+        Swipe.initSwipe(todoAdapter, this, db, rView)
 
-        db.todoDao().getFinishedTasks().observe(this,{
-            if(it.isNotEmpty()) {
+        db.todoDao().getFinishedTasks().observe(this, {
+            if (it.isNotEmpty()) {
                 list.clear()
                 list.addAll(it)
                 todoAdapter.notifyDataSetChanged()
-                rView.scrollToPosition(todoAdapter.itemCount-1)
-            }else{
+                rView.scrollToPosition(todoAdapter.itemCount - 1)
+            } else {
                 list.clear()
                 todoAdapter.notifyDataSetChanged()
-                Toast.makeText(this,"No Todos to display", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No Todos to display", Toast.LENGTH_SHORT).show()
             }
         })
+
+        MobileAds.initialize(this)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_history,menu)
+        menuInflater.inflate(R.menu.menu_history, menu)
         val searchItem = menu?.findItem(R.id.Search)
         val searchView = searchItem?.actionView as SearchView
 
-        searchItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 displaySearchedTodo()
                 return true
@@ -67,7 +72,7 @@ class History : AppCompatActivity() {
             }
         })
 
-        searchView.setOnQueryTextListener(object:SearchView.OnQueryTextListener{
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null) {
@@ -87,22 +92,22 @@ class History : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    private fun displaySearchedTodo(newText:String="") {
+    private fun displaySearchedTodo(newText: String = "") {
         db.todoDao().getFinishedTasks().observe(this, {
             list.clear()
-            if(it.isNotEmpty()) {
+            if (it.isNotEmpty()) {
                 val filteredList = it.filter { todo ->
                     todo.title.contains(newText, true)
                 }
                 list.addAll(filteredList)
                 todoAdapter.notifyDataSetChanged()
-                if(filteredList.isEmpty()){
-                    Toast.makeText(this,"No search results found",Toast.LENGTH_SHORT).show()
+                if (filteredList.isEmpty()) {
+                    Toast.makeText(this, "No search results found", Toast.LENGTH_SHORT).show()
                 }
-            }else{
+            } else {
                 list.clear()
                 todoAdapter.notifyDataSetChanged()
-                Toast.makeText(this,"No todos to display",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No Todos to display", Toast.LENGTH_SHORT).show()
             }
         })
     }

@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.app.PendingIntent
 import android.app.TimePickerDialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.widget.*
@@ -15,12 +16,13 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class NewTask : AppCompatActivity(), View.OnClickListener {
-    private var myCalendar:Calendar= Calendar.getInstance()
-    private lateinit var dateSetListener:DatePickerDialog.OnDateSetListener
+    private var myCalendar: Calendar = Calendar.getInstance()
+    private lateinit var dateSetListener: DatePickerDialog.OnDateSetListener
     private lateinit var timeSetListener: TimePickerDialog.OnTimeSetListener
-    private val categories = arrayListOf("Education","Business","Banking","Personal","Insurance","Shopping")
-    private lateinit var alarmManager:AlarmManager
-    var id:Long=-1L
+    private val categories =
+        arrayListOf("Education", "Business", "Banking", "Personal", "Insurance", "Shopping")
+    private lateinit var alarmManager: AlarmManager
+    var id: Long = -1L
     private lateinit var todoToBeEdited: TodoModel
 
 
@@ -32,25 +34,25 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_new_task)
         noteSwitch.setOnCheckedChangeListener { _, isChecked ->
-            if(isChecked){
-                tvSwitch.text=getString(R.string.note)
-                tvDate.visibility=View.GONE
-                tvTime.visibility=View.GONE
-                tilDate.visibility=View.GONE
-                tilTime.visibility=View.GONE
+            if (isChecked) {
+                tvSwitch.text = getString(R.string.note)
+                tvDate.visibility = View.GONE
+                tvTime.visibility = View.GONE
+                tilDate.visibility = View.GONE
+                tilTime.visibility = View.GONE
                 etDescription.setLines(15)
-            }else{
-                tvSwitch.text=getString(R.string.todo)
-                tvDate.visibility=View.VISIBLE
-                tvTime.visibility=View.VISIBLE
-                tilDate.visibility=View.VISIBLE
-                tilTime.visibility=View.VISIBLE
+            } else {
+                tvSwitch.text = getString(R.string.todo)
+                tvDate.visibility = View.VISIBLE
+                tvTime.visibility = View.VISIBLE
+                tilDate.visibility = View.VISIBLE
+                tilTime.visibility = View.VISIBLE
                 etDescription.setLines(2)
             }
         }
 
-        id=intent.getLongExtra("ID",-1L)
-        if(id!=-1L){
+        id = intent.getLongExtra("ID", -1L)
+        if (id != -1L) {
             toolbarNewTask.title = "Edit Task"
             GlobalScope.launch(Dispatchers.Main) {
                 todoToBeEdited = withContext(Dispatchers.IO) { db.todoDao().getTodoById(id) }
@@ -62,22 +64,22 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
         etTime.setOnClickListener(this)
         saveBtn.setOnClickListener(this)
         setSpinner()
-        alarmManager=getSystemService(ALARM_SERVICE) as AlarmManager
+        alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
     }
 
     private fun setTodoToBeEdited() {
-        if(todoToBeEdited.dateAndTime!=null) {
+        if (todoToBeEdited.dateAndTime != null) {
             myCalendar.time = Date(todoToBeEdited.dateAndTime!!)
             updateDate()
             updateTime()
-        }else noteSwitch.isChecked=true
+        } else noteSwitch.isChecked = true
 
-        (etTitle as TextView).text=todoToBeEdited.title
-        (etDescription as TextView).text=todoToBeEdited.description
+        (etTitle as TextView).text = todoToBeEdited.title
+        (etDescription as TextView).text = todoToBeEdited.description
 
-        var spId=0
-        for(i in 0..categories.size){
-            if(categories[i]==todoToBeEdited.category) {
+        var spId = 0
+        for (i in 0..categories.size) {
+            if (categories[i] == todoToBeEdited.category) {
                 spId = i
                 break
             }
@@ -86,21 +88,22 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setSpinner() {
-        val spinnerAdapter = ArrayAdapter(this,R.layout.support_simple_spinner_dropdown_item,categories)
+        val spinnerAdapter =
+            ArrayAdapter(this, R.layout.support_simple_spinner_dropdown_item, categories)
         categories.sort()
         spinnerCategory.adapter = spinnerAdapter
     }
 
     override fun onClick(v: View) {
-        when(v.id){
-            R.id.etDate->{
+        when (v.id) {
+            R.id.etDate -> {
                 setListenerDate()
             }
-            R.id.etTime->{
+            R.id.etTime -> {
                 setListenerTime()
             }
-            R.id.saveBtn->{
-                if(id==-1L)
+            R.id.saveBtn -> {
+                if (id == -1L)
                     saveTask()
                 else editTask()
             }
@@ -108,51 +111,95 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun editTask() {
-        val todo=createTodoObject()
-        todo.id=todoToBeEdited.id
-        GlobalScope.launch(Dispatchers.IO) {
-            db.todoDao().editTodo(todo)
+        if (!existErrors()) {
+            val todo = createTodoObject()
+            todo.id = todoToBeEdited.id
+            GlobalScope.launch(Dispatchers.IO) {
+                db.todoDao().editTodo(todo)
+            }
+            finish()
         }
-        finish()
     }
 
     private fun saveTask() {
-        val todo=createTodoObject()
-        GlobalScope.launch(Dispatchers.IO){
-            db.todoDao().insertTodo(todo)
+        if (!existErrors()) {
+            val todo = createTodoObject()
+            GlobalScope.launch(Dispatchers.IO) {
+                db.todoDao().insertTodo(todo)
+            }
+            finish()
         }
-        finish()
     }
 
-    private fun createTodoObject():TodoModel{
-        val title=etTitle.text.toString()
-        val description=etDescription.text.toString()
-        lateinit var todo:TodoModel
-        var reqCode: Int?=null
+    private fun existErrors():Boolean{
+        var error = false
 
-        if(!noteSwitch.isChecked) {
-            if(id!=-1L) {
-                    if(myCalendar.time.time==todoToBeEdited.dateAndTime)
-                        reqCode = todoToBeEdited.reqCodeForNotification!!
-                    else if(todoToBeEdited.dateAndTime!=null){
-                        cancelAlarm()
-                    }
+        if (etTitle.text.toString() == "") {
+            etTitle.error = "Title cannot be empty"
+            error = true
+        }
+
+        if (etDescription.text.toString() == "") {
+            etDescription.error = "Description cannot be empty"
+            error = true
+        }
+
+        if (tilDate.visibility == View.VISIBLE && (etDate.text.toString() == "" || etTime.text.toString() == "")) {
+            Toast.makeText(this, "Date/Time cannot be empty", Toast.LENGTH_LONG).show()
+            error = true
+        }
+
+        return error
+    }
+
+    private fun createTodoObject(): TodoModel {
+        val title = etTitle.text.toString()
+        val description = etDescription.text.toString()
+        lateinit var todo: TodoModel
+        var reqCode: Int? = null
+
+        if (!noteSwitch.isChecked) {
+            if (id != -1L) {
+                if (myCalendar.time.time == todoToBeEdited.dateAndTime)
+                    reqCode = todoToBeEdited.reqCodeForNotification!!
+                else if (todoToBeEdited.dateAndTime != null) {
+                    cancelAlarm()
+                }
             }
 
-            if(reqCode==null) {
-                //Setting Alarm
-                val intent = Intent(this, AlarmReceiver::class.java)
+            if (reqCode == null)
                 reqCode = System.currentTimeMillis().toInt()
-                intent.putExtra("todo", arrayOf(reqCode.toString(), title, description))
-                val pi =
-                    PendingIntent.getBroadcast(
-                        this,
-                        reqCode,
-                        intent,
-                        PendingIntent.FLAG_UPDATE_CURRENT
+
+            //Setting Alarm
+            val intent = Intent(this, AlarmReceiver::class.java)
+            intent.putExtra("todo", arrayOf(reqCode.toString(), title, description))
+            val pi =
+                PendingIntent.getBroadcast(
+                    this,
+                    reqCode,
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT
+                )
+
+            when {
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
+                    //Wakes up the device in Doze Mode
+                    alarmManager.setExactAndAllowWhileIdle(
+                        AlarmManager.RTC_WAKEUP,
+                        myCalendar.time.time,
+                        pi
                     )
-                alarmManager.set(AlarmManager.RTC_WAKEUP, myCalendar.time.time, pi)
+                }
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP -> {
+                    //Wakes up the device in Idle Mode
+                    alarmManager.setExact(AlarmManager.RTC_WAKEUP, myCalendar.time.time, pi)
+                }
+                else -> {
+                    //Old APIs
+                    alarmManager.set(AlarmManager.RTC_WAKEUP, myCalendar.time.time, pi)
+                }
             }
+
 
             todo = TodoModel(
                 title,
@@ -161,8 +208,8 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
                 myCalendar.time.time,
                 reqCode
             )
-        }else if(noteSwitch.isChecked){
-            if(id!=-1L && todoToBeEdited.dateAndTime!=null){
+        } else if (noteSwitch.isChecked) {
+            if (id != -1L && todoToBeEdited.dateAndTime != null) {
                 cancelAlarm()
             }
             todo = TodoModel(
@@ -176,7 +223,14 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
 
     private fun cancelAlarm() {
         val intent = Intent(this, AlarmReceiver::class.java)
-        intent.putExtra("todo", arrayOf(todoToBeEdited.reqCodeForNotification.toString(), todoToBeEdited.title, todoToBeEdited.description))
+        intent.putExtra(
+            "todo",
+            arrayOf(
+                todoToBeEdited.reqCodeForNotification.toString(),
+                todoToBeEdited.title,
+                todoToBeEdited.description
+            )
+        )
         val pi =
             PendingIntent.getBroadcast(
                 this,
@@ -188,32 +242,36 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun setListenerDate() {
-        dateSetListener=DatePickerDialog.OnDateSetListener{ _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
-            myCalendar.set(Calendar.YEAR,year)
-            myCalendar.set(Calendar.MONTH,month)
-            myCalendar.set(Calendar.DAY_OF_MONTH,dayOfMonth)
-            updateDate()
-        }
+        dateSetListener =
+            DatePickerDialog.OnDateSetListener { _: DatePicker, year: Int, month: Int, dayOfMonth: Int ->
+                myCalendar.set(Calendar.YEAR, year)
+                myCalendar.set(Calendar.MONTH, month)
+                myCalendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
+                updateDate()
+            }
 
-        val datePickerDialog= DatePickerDialog(this,
+        val datePickerDialog = DatePickerDialog(
+            this,
             dateSetListener,
             myCalendar.get(Calendar.YEAR),
             myCalendar.get(Calendar.MONTH),
             myCalendar.get(Calendar.DAY_OF_MONTH)
         )
 
-        datePickerDialog.datePicker.minDate=System.currentTimeMillis()
+        datePickerDialog.datePicker.minDate = System.currentTimeMillis()
         datePickerDialog.show()
     }
 
     private fun setListenerTime() {
-        timeSetListener=TimePickerDialog.OnTimeSetListener{ _: TimePicker, hourOfDay: Int, min: Int ->
-            myCalendar.set(Calendar.HOUR_OF_DAY,hourOfDay)
-            myCalendar.set(Calendar.MINUTE,min)
-            updateTime()
-        }
+        timeSetListener =
+            TimePickerDialog.OnTimeSetListener { _: TimePicker, hourOfDay: Int, min: Int ->
+                myCalendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                myCalendar.set(Calendar.MINUTE, min)
+                updateTime()
+            }
 
-        val timePickerDialog= TimePickerDialog(this,
+        val timePickerDialog = TimePickerDialog(
+            this,
             timeSetListener,
             myCalendar.get(Calendar.HOUR_OF_DAY),
             myCalendar.get(Calendar.MINUTE),
@@ -224,15 +282,23 @@ class NewTask : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun updateDate() {
-        val myFormat="EEE, d MMM yyyy"
+        val myFormat = "EEE, d MMM yyyy"
         val sdf = SimpleDateFormat(myFormat)
-        etDate.setText(sdf.format(myCalendar.time))
+        if (etTime.text.toString()!="" && myCalendar.time.time < System.currentTimeMillis()) {
+            Toast.makeText(this, "Cannot set a Todo for Past", Toast.LENGTH_LONG).show()
+        }else{
+            etDate.setText(sdf.format(myCalendar.time))
+        }
     }
 
     private fun updateTime() {
-        val myFormat="h:mm a"
+        val myFormat = "h:mm a"
         val sdf = SimpleDateFormat(myFormat)
-        etTime.setText(sdf.format(myCalendar.time))
+        if (etDate.text.toString()!="" && myCalendar.time.time < System.currentTimeMillis()) {
+            Toast.makeText(this, "Cannot set a Todo for Past", Toast.LENGTH_LONG).show()
+        } else {
+            etTime.setText(sdf.format(myCalendar.time))
+        }
     }
 
 }

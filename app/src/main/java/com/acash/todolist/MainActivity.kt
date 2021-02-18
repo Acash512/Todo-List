@@ -8,14 +8,15 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
-import kotlinx.android.synthetic.main.activity_history.*
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.MobileAds
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
     private val list = ArrayList<TodoModel>()
-    private val todoAdapter=TodoAdapter(list,this)
+    private val todoAdapter = TodoAdapter(list, this)
 
-    private val db by lazy{
+    private val db by lazy {
         TodoDatabase.getDatabase(this)
     }
 
@@ -24,45 +25,50 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
-        todoAdapter.onClick={
-            val intent = Intent(this@MainActivity,NewTask::class.java)
-            intent.putExtra("ID",it)
+        todoAdapter.onClick = {
+            val intent = Intent(this@MainActivity, NewTask::class.java)
+            intent.putExtra("ID", it)
             this@MainActivity.startActivity(intent)
         }
 
-        rView.apply{
-            layoutManager=LinearLayoutManager(this@MainActivity,LinearLayoutManager.VERTICAL,true)
-            adapter=todoAdapter
+        rView.apply {
+            layoutManager =
+                LinearLayoutManager(this@MainActivity, LinearLayoutManager.VERTICAL, true)
+            adapter = todoAdapter
         }
 
-        Swipe.initSwipe(todoAdapter,this@MainActivity,db,rView)
+        Swipe.initSwipe(todoAdapter, this@MainActivity, db, rView)
 
         db.todoDao().getAllTodos().observe(
             this, {
-                if(it.isNotEmpty()) {
+                if (it.isNotEmpty()) {
                     list.clear()
                     list.addAll(it)
                     todoAdapter.notifyDataSetChanged()
-                    rView.scrollToPosition(todoAdapter.itemCount-1)
-                }else{
+                    rView.scrollToPosition(todoAdapter.itemCount - 1)
+                } else {
                     list.clear()
                     todoAdapter.notifyDataSetChanged()
-                    Toast.makeText(this,"No Todos to display",Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this, "No Todos to display", Toast.LENGTH_SHORT).show()
                 }
             }
         )
 
-        newTaskButton.setOnClickListener{
-            startActivity(Intent(this,NewTask::class.java))
+        newTaskButton.setOnClickListener {
+            startActivity(Intent(this, NewTask::class.java))
         }
+
+        MobileAds.initialize(this)
+        val adRequest = AdRequest.Builder().build()
+        adView.loadAd(adRequest)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.menu_main,menu)
+        menuInflater.inflate(R.menu.menu_main, menu)
         val searchItem = menu?.findItem(R.id.Search)
         val searchView = searchItem?.actionView as SearchView
 
-        searchItem.setOnActionExpandListener(object: MenuItem.OnActionExpandListener {
+        searchItem.setOnActionExpandListener(object : MenuItem.OnActionExpandListener {
             override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                 displaySearchedTodo()
                 return true
@@ -74,7 +80,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
-        searchView.setOnQueryTextListener(object:SearchView.OnQueryTextListener{
+        searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
 
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (query != null) {
@@ -94,30 +100,30 @@ class MainActivity : AppCompatActivity() {
         return super.onCreateOptionsMenu(menu)
     }
 
-    private fun displaySearchedTodo(newText:String="") {
+    private fun displaySearchedTodo(newText: String = "") {
         db.todoDao().getAllTodos().observe(this, {
             list.clear()
-            if(it.isNotEmpty()) {
+            if (it.isNotEmpty()) {
                 val filteredList = it.filter { todo ->
                     todo.title.contains(newText, true)
                 }
                 list.addAll(filteredList)
                 todoAdapter.notifyDataSetChanged()
-                if(filteredList.isEmpty()){
-                    Toast.makeText(this,"No search results found",Toast.LENGTH_SHORT).show()
+                if (filteredList.isEmpty()) {
+                    Toast.makeText(this, "No search results found", Toast.LENGTH_SHORT).show()
                 }
-            }else{
+            } else {
                 list.clear()
                 todoAdapter.notifyDataSetChanged()
-                Toast.makeText(this,"No todos to display",Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "No todos to display", Toast.LENGTH_SHORT).show()
             }
         })
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when(item.itemId){
-            R.id.History-> {
-                startActivity(Intent(this,History::class.java))
+        when (item.itemId) {
+            R.id.History -> {
+                startActivity(Intent(this, History::class.java))
             }
         }
         return super.onOptionsItemSelected(item)
